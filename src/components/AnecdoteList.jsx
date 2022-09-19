@@ -2,9 +2,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { vote } from '../reducers/anecdoteReducer';
 import Notification from './Notification';
 import { setNotification } from '../reducers/notificationReducer';
-import { Filter } from './Filter';
+import Filter from './Filter';
 
-export const AnecdoteList = () => {
+const AnecdoteList = () => {
   const dispatch = useDispatch();
   const anecdotes = useSelector(({ anecdotes }) => anecdotes);
   const anecdotesSorted = [...anecdotes].sort((a, b) => a.votes - b.votes);
@@ -42,3 +42,5 @@ export const AnecdoteList = () => {
     </>
   );
 };
+
+export default AnecdoteList;

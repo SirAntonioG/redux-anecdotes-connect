@@ -1,15 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-
-//
-const getId = () => (100000 * Math.random()).toFixed(0);
-
-const asObject = (anecdote) => {
-  return {
-    content: anecdote,
-    id: getId(),
-    votes: 0,
-  };
-};
+import anecdoteService from '../services/anecdotes';
 
 // initialState
 const initialState = [];
@@ -19,28 +9,43 @@ const anecdoteSlice = createSlice({
   name: 'anecdotes',
   initialState,
   reducers: {
-    createAnecdote(state, action) {
-      state.push(action.payload);
-    },
-    vote(state, action) {
-      const id = action.payload;
-      const anecdoteToVoteIndex = state.findIndex((item) => item.id === id);
-      const anecdoteToVote = state[anecdoteToVoteIndex];
-      const votedAnecdote = {
-        ...anecdoteToVote,
-        votes: anecdoteToVote.votes + 1,
-      };
-      state[anecdoteToVoteIndex] = votedAnecdote;
-    },
     appendAnecdote(state, action) {
       state.push(action.payload);
     },
-    setAnnecdotes(state, action) {
+    setAnecdotes(state, action) {
       return action.payload;
     },
   },
 });
 
-export const { createAnecdote, vote, appendAnecdote, setAnnecdotes } =
-  anecdoteSlice.actions;
+export const { appendAnecdote, setAnecdotes } = anecdoteSlice.actions;
+
+export const initializeAnnecdotes = () => {
+  return async (dispatch) => {
+    const anecdotes = await anecdoteService.getAll();
+    dispatch(setAnecdotes(anecdotes));
+  };
+};
+
+export const createAnecdote = (content) => {
+  return async (dispatch) => {
+    const newAnecdote = await anecdoteService.createNew(content);
+    dispatch(appendAnecdote(newAnecdote));
+  };
+};
+
+export const vote = (id) => {
+  return async (dispatch) => {
+    const anecdotes = await anecdoteService.getAll();
+    const anecdoteToVoteIndex = anecdotes.findIndex((item) => item.id === id);
+    const anecdoteToVote = anecdotes[anecdoteToVoteIndex];
+    const votedAnecdote = await anecdoteService.updateAnecdoteVote(id, {
+      ...anecdoteToVote,
+      votes: anecdoteToVote.votes + 1,
+    });
+    anecdotes[anecdoteToVoteIndex] = votedAnecdote;
+    dispatch(setAnecdotes(anecdotes));
+  };
+};
+
 export default anecdoteSlice.reducer;
